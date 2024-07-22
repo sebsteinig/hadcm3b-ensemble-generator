@@ -6,13 +6,13 @@ from helpers import setup_logging, duplicate_job, generate_ensemble_jobid
 
 # define user input
 home_dir = os.path.expanduser("~")
-vanilla_job = os.path.join(home_dir, "hadcm3b-ensembles", "vanilla_jobs", "xpzna")
+vanilla_job = os.path.join(home_dir, "hadcm3b-ensemble-generator", "vanilla_jobs", "xpzna")
 ensemble_exp = "xpzn" 
 parmater_file = "param_tables/acang_single_param_tuning.json"
 jobs_dir = os.path.join(home_dir, "umui_jobs")
 
 # setup logging
-log_dir = os.path.join(home_dir, "hadcm3b-ensembles", "logs")
+log_dir = os.path.join(home_dir, "hadcm3b-ensemble-generator", "logs")
 logger, generated_ids_log_file, generated_params_log_file = setup_logging(ensemble_exp, log_dir)
 
 def main():
@@ -76,10 +76,17 @@ def main():
                 logger.warning(f"{expid}: Key {key} not found in {original_file}")
                 continue
 
+            # Convert value to string and remove square brackets if it is a list
+            if isinstance(value, list):
+                value_str = ",".join(map(str, value))
+            else:
+                value_str = str(value)
+
             # update the parameters in the job namelist
-            logger.info(f"{expid}: Setting {key} to {value}")
+            logger.info(f"{expid}: Setting {key} to {value_str}")
+            
             # replace whole line in namelist
-            subprocess.run(["sed", "-i", f"s|{key}=.*|{key}={value}|", original_file], check=True)
+            subprocess.run(["sed", "-i", f"s|{key}=.*|{key}={value_str}|", original_file], check=True)
 
     # save the updated JSON data to a new file for loggoing
     with open(generated_params_log_file, 'w') as f:

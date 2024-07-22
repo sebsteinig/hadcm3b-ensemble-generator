@@ -197,7 +197,7 @@ ALT_ANCIL=$ANCIL_ROOT/ancil/preind2_noiceland
 OZONE_ANCIL=$ANCIL_ROOT/ancil/preind2_noiceland
 MY_UPDATES=$HOME/um_updates
 MY_DUMPS=$HOME/dumps
-MY_EXECS=$DUMP2HOLD/um/execs_hadocc
+MY_EXECS=$DUMP2HOLD/um/execs_cc_seb
 PV_UPDATES=$PV_ROOT/um_updates
 PV_DUMPS=$PV_ROOT/dumps
 PV_EXECS=$PV_ROOT/execs
@@ -293,7 +293,7 @@ CF77_ALL_MODEL=false              # Hand edit for full compilation.
 ATEXPERT=false  # Hand edit for ATEXPERT (need CF77_ALL_MODEL)
 #
 
-LOADMODULE=$DATAW/HadCM3BLC_M2.1Da    # load module, model
+LOADMODULE=$MY_EXECS/HadCM3BLC_M2.1Da.exec    # load module, model
 LOADRECON=$PV_EXECS/standard_new04.recon   # load module, reconfiguration
 
 ######   Control files associated with the run                    ######
