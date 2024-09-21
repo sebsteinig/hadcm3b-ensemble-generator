@@ -7,10 +7,10 @@ from helpers import setup_logging, duplicate_job, generate_ensemble_jobid
 # define user input
 home_dir = os.path.expanduser("~")
 vanilla_job = os.path.join(
-    home_dir, "hadcm3b-ensemble-generator", "vanilla_jobs", "xqaba"
+    home_dir, "hadcm3b-ensemble-generator", "vanilla_jobs", "xqapa"
 )
-ensemble_exp = "xqab"
-parmater_file = "param_tables/acang_random_param_sets.json"
+ensemble_exp = "xqau"
+parmater_file = "param_tables/xqau.json"
 jobs_dir = os.path.join(home_dir, "umui_jobs")
 
 # setup logging

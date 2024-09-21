@@ -280,7 +280,8 @@ def plot_param_distributions(
         # loop over the PFTs
         for idx in range(5):
             print(f"Plotting paramater distributions for {labels[idx]}")
-            fig, axs = plt.subplots(3, 2, figsize=(12, 12))
+            # fig, axs = plt.subplots(3, 2, figsize=(12, 12))
+            fig, axs = plt.subplots(4, 2, figsize=(12, 12))
             fig.suptitle(
                 f"Distributions of perturbed parameters for {labels[idx]} ({ensemble_name})"
             )
@@ -291,7 +292,7 @@ def plot_param_distributions(
                 values = []
                 for params in perturbed_sets:
                     if (
-                        key == "V_CRIT_ALPHA"
+                        key in ["V_CRIT_ALPHA", "Q10", "KAPS"]
                         and isinstance(params[key], list)
                         and len(params[key]) == 1
                     ):
