@@ -34,3 +34,5 @@ and this post-processing script: `~ssteinig/scripts/land_cc_v2`
 - to avoid disk quota issues on BC4, we can run the ensemble jobs on the private BRIDGE partition `/mnt/storage/private/bridge/um_output` with `create_job_dirs.sh` to create only symlinks in the user's dump2hold directory
 - input to this is the log fiile of generated IDs from step 4
 - finally, submit all jobs to the BC4 queue with `submit_all_jobs.sh`, again, using the previous logfile to loop over all new IDs 
+
+Once running/finished, the transfer, processing and visualisation of the results is done on the BRIDGE servers using the https://github.com/sebsteinig/hadcm3b-ensemble-validator repo
