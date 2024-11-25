@@ -108,7 +108,8 @@ def duplicate_job(old_runid_input, new_RUNID, force_overwrite=True):
     old_RUNID = old_runid_input.split("/")[-1]
 
     # Check that old_RUNID and new_RUNID have exactly 5 characters
-    if len(old_RUNID) != 5 or len(new_RUNID) != 5:
+    # if len(old_RUNID) != 5 or len(new_RUNID) != 5:
+    if len(old_RUNID) != 5:
         print("Error: RUNIDs must have exactly 5 characters.")
         return False
 
@@ -281,7 +282,9 @@ def plot_param_distributions(
         for idx in range(5):
             print(f"Plotting paramater distributions for {labels[idx]}")
             # fig, axs = plt.subplots(3, 2, figsize=(12, 12))
-            fig, axs = plt.subplots(4, 2, figsize=(12, 12))
+            fig, axs = plt.subplots(
+                len(list(perturbed_BL_params.keys())) // 2, 2, figsize=(12, 12)
+            )
             fig.suptitle(
                 f"Distributions of perturbed parameters for {labels[idx]} ({ensemble_name})"
             )

@@ -1,26 +1,21 @@
 import os
 import json
 import subprocess
+import argparse
 
 from helpers import setup_logging, duplicate_job, generate_ensemble_jobid
 
-# define user input
-home_dir = os.path.expanduser("~")
-vanilla_job = os.path.join(
-    home_dir, "hadcm3b-ensemble-generator", "vanilla_jobs", "xqapa"
-)
-ensemble_exp = "xqau"
-parmater_file = "param_tables/xqau.json"
-jobs_dir = os.path.join(home_dir, "umui_jobs")
 
-# setup logging
-log_dir = os.path.join(home_dir, "hadcm3b-ensemble-generator", "logs")
-logger, generated_ids_log_file, generated_params_log_file = setup_logging(
-    ensemble_exp, log_dir
-)
+# Setup logging directory
+def setup_logging_directories(home_dir, ensemble_exp):
+    log_dir = os.path.join(home_dir, "hadcm3b-ensemble-generator", "logs")
+    logger, generated_ids_log_file, generated_params_log_file = setup_logging(
+        ensemble_exp, log_dir
+    )
+    return logger, generated_ids_log_file, generated_params_log_file
 
 
-def main():
+def main(vanilla_job, parameter_file, ensemble_exp, singleJob=False):
     """
     Generates ensemble job directories based on a template job and new model parameters
     to generate a perturbed parameter ensemble.
@@ -30,41 +25,53 @@ def main():
     the new parameters. The generated jobs are saved in the specified directory.
     Logs the operations to both the console and a log file.
     """
+    home_dir = os.path.expanduser("~")
+    jobs_dir = os.path.join(home_dir, "umui_jobs")  # Fixed path for jobs_dir
 
-    # read JSON file with new model parameters
+    # Setup logging
+    logger, generated_ids_log_file, generated_params_log_file = (
+        setup_logging_directories(home_dir, ensemble_exp)
+    )
+
+    # Read JSON file with new model parameters
     try:
-        with open(parmater_file, "r") as f:
+        with open(parameter_file, "r") as f:
             json_data = json.load(f)
     except FileNotFoundError:
-        logger.error(f"Input file not found: {parmater_file}")
+        logger.error(f"Input file not found: {parameter_file}")
         return
     except json.JSONDecodeError:
-        logger.error(f"Error decoding JSON file: {parmater_file}")
+        logger.error(f"Error decoding JSON file: {parameter_file}")
         return
+
     num_records = len(json_data)
-    # prepare to log generated ensemble IDs and paramters to disk
+
+    # Prepare to log generated ensemble IDs and parameters to disk
     updated_params_data = []
 
-    # create a new ensemble job for each record in the JSON file
+    # Create a new ensemble job for each record in the JSON file
     for i in range(num_records):
-        expid = generate_ensemble_jobid(ensemble_exp, i)
+        if singleJob:
+            expid = f"{ensemble_exp}_{i:03d}"
+        else:
+            expid = generate_ensemble_jobid(ensemble_exp, i)
 
         with open(generated_ids_log_file, "a") as f:
             f.write(f"{expid}\n")
 
-        # create a copy of the vanilla job
+        # Create a copy of the vanilla job
         if not duplicate_job(vanilla_job, expid, force_overwrite=True):
             logger.error(f"Failed to duplicate job: {vanilla_job} to {expid}")
             continue
 
-        # get the new parameters for this ensemble member
+        # Get the new parameters for this ensemble member
         record = json_data[i]
         record["ensemble_id"] = expid
         updated_params_data.append(record)
 
         original_file = os.path.join(jobs_dir, expid, "CNTLATM")
 
-        # read the content of the namelist file
+        # Read the content of the namelist file
         try:
             with open(original_file, "r") as file:
                 file_content = file.read()
@@ -72,11 +79,11 @@ def main():
             logger.error(f"File not found: {original_file}")
             continue
 
-        # loop over all keys (i.e., all parameters to change)
+        # Loop over all keys (i.e., all parameters to change)
         for key, value in record.items():
             if key == "ensemble_id":
                 continue
-            # check if the key exists in the namelist
+            # Check if the key exists in the namelist
             if f"{key}=" not in file_content:
                 logger.warning(f"{expid}: Key {key} not found in {original_file}")
                 continue
@@ -87,16 +94,16 @@ def main():
             else:
                 value_str = str(value)
 
-            # update the parameters in the job namelist
+            # Update the parameters in the job namelist
             logger.info(f"{expid}: Setting {key} to {value_str}")
 
-            # replace whole line in namelist
+            # Replace whole line in namelist
             subprocess.run(
                 ["sed", "-i", f"s|{key}=.*|{key}={value_str}|", original_file],
                 check=True,
             )
 
-    # save the updated JSON data to a new file for loggoing
+    # Save the updated JSON data to a new file for logging
     with open(generated_params_log_file, "w") as f:
         json.dump(updated_params_data, f, indent=4)
 
@@ -108,4 +115,30 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Set up command-line argument parsing
+    parser = argparse.ArgumentParser(
+        description="Generate perturbed parameter ensemble jobs."
+    )
+    parser.add_argument(
+        "--vanilla_job",
+        type=str,
+        required=True,
+        help="Path to the vanilla/template job ",
+    )
+    parser.add_argument(
+        "--parameter_file",
+        type=str,
+        required=True,
+        help="Path to the JSON file containing the parameters to update",
+    )
+    parser.add_argument("--ensemble_exp", type=str, required=True, help="Ensemble name")
+    parser.add_argument(
+        "--singleJob",
+        action="store_true",
+        help="Create variations of a single job (with underscores) or variations of letters a-z",
+    )
+
+    args = parser.parse_args()
+
+    # Run the main function with input arguments
+    main(args.vanilla_job, args.parameter_file, args.ensemble_exp, args.singleJob)
