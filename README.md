@@ -1,4 +1,4 @@
-# HadCM3B land carbon cycle ensembles
+# HadCM3B land carbon cycle ensembles generator
 This repo contains scripts and instructions to automatically generate ensembles of UM jobs. These ensembles are intended to test a large range of model parameters for the interactive land carbon cylce component added by Chris Jones. The goal is to run the short, standard preindustrial simulation with hundreds (or thousands) of different tuning parameters to ultimately identify one (or several) promising parameter sets to use as a baseline configuration for the new HadCM3BL version with a fully coupled carbon cycle. 
 
 ## example workflow
